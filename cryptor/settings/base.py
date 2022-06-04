@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'account.apps.AccountConfig',
-    'sample-history'
+    'exchange.apps.ExchangeConfig',
+    'simple_history'
 ]
 
 MIDDLEWARE = [
