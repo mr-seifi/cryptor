@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import EmailValidator
 from uuid import uuid4
+from simple_history.models import HistoricalRecords
 
 
 class Wallet(models.Model):
@@ -13,6 +14,7 @@ class Wallet(models.Model):
 
     network = models.CharField(choices=WalletChoices.choices, max_length=10)
     address = models.CharField(max_length=150)
+    history = HistoricalRecords()
 
 
 class BaseUser(models.Model):
@@ -25,6 +27,7 @@ class BaseUser(models.Model):
     token = models.UUIDField(default=uuid4, editable=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
 
     def __str__(self):
         return f'{self.token[:6]}:{self.name}'
