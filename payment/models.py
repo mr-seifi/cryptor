@@ -1,6 +1,7 @@
 from django.db import models
 from account.models import Trader, User
 from simple_history.models import HistoricalRecords
+from uuid import uuid4
 
 
 class Plan(models.Model):
@@ -20,7 +21,11 @@ class Payment(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, related_name='payments')
     transaction_hash = models.CharField(max_length=100)
     is_accepted = models.BooleanField(blank=True)
+    token = models.UUIDField(default=uuid4, editable=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     expired = models.DateTimeField(blank=True)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return f'{self.token[:6]}'
