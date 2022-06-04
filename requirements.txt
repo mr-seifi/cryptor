@@ -1,0 +1,10 @@
+asgiref==3.5.2
+async-timeout==4.0.2
+backports.zoneinfo==0.2.1
+Deprecated==1.2.13
+Django==4.0.5
+packaging==21.3
+pyparsing==3.0.9
+redis==4.3.3
+sqlparse==0.4.2
+wrapt==1.14.1
