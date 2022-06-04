@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'exchange.apps.ExchangeConfig',
     'market.apps.MarketConfig',
     'payment.apps.PaymentConfig',
+    'monitoring.apps.MonitoringConfig',
     'simple_history'
 ]
 
