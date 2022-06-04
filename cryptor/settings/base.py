@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'account.apps.AccountConfig',
     'exchange.apps.ExchangeConfig',
+    'market.apps.MarketConfig',
     'simple_history'
 ]
 

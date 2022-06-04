@@ -33,10 +33,10 @@ class User(BaseUser):
 
 class Wallet(models.Model):
     class WalletChoices(models.TextChoices):
-        bep_2 = 'bep-2', 'BEP-2'
-        bep_20 = 'bep-20', 'BEP-20'
-        trc_20 = 'trc-20', 'TRC-20'
-        erc_20 = 'erc-20', 'ERC-20'
+        BEP_2 = 'bep-2', 'BEP-2'
+        BEP_20 = 'bep-20', 'BEP-20'
+        TRC_20 = 'trc-20', 'TRC-20'
+        ERC_20 = 'erc-20', 'ERC-20'
 
     trader = models.ForeignKey(to=Trader, on_delete=models.CASCADE, related_name='wallets')
     network = models.CharField(choices=WalletChoices.choices, max_length=10)
