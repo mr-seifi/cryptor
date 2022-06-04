@@ -4,19 +4,6 @@ from uuid import uuid4
 from simple_history.models import HistoricalRecords
 
 
-class Wallet(models.Model):
-
-    class WalletChoices(models.TextChoices):
-        bep_2 = 'bep-2', 'BEP-2'
-        bep_20 = 'bep-20', 'BEP-20'
-        trc_20 = 'trc-20', 'TRC-20'
-        erc_20 = 'erc-20', 'ERC-20'
-
-    network = models.CharField(choices=WalletChoices.choices, max_length=10)
-    address = models.CharField(max_length=150)
-    history = HistoricalRecords()
-
-
 class BaseUser(models.Model):
 
     name = models.CharField(max_length=50)
@@ -27,7 +14,6 @@ class BaseUser(models.Model):
     token = models.UUIDField(default=uuid4, editable=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    history = HistoricalRecords()
 
     def __str__(self):
         return f'{self.token[:6]}:{self.name}'
@@ -35,10 +21,27 @@ class BaseUser(models.Model):
 
 class Trader(BaseUser):
 
-    wallet = models.ManyToManyField(to=Wallet, related_name='trader')
+    history = HistoricalRecords()
 
 
 class User(BaseUser):
 
     user_trader = models.ForeignKey(to=Trader, on_delete=models.CASCADE, related_name='army')
+    history = HistoricalRecords()
     # strategy = models.ForeignKey
+
+
+class Wallet(models.Model):
+    class WalletChoices(models.TextChoices):
+        bep_2 = 'bep-2', 'BEP-2'
+        bep_20 = 'bep-20', 'BEP-20'
+        trc_20 = 'trc-20', 'TRC-20'
+        erc_20 = 'erc-20', 'ERC-20'
+
+    trader = models.ForeignKey(to=Trader, on_delete=models.CASCADE, related_name='wallets')
+    network = models.CharField(choices=WalletChoices.choices, max_length=10)
+    address = models.CharField(max_length=150)
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return f'{self.network}:{self.address}'
