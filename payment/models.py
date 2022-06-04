@@ -29,3 +29,12 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'{self.token[:6]}'
+
+    def save(self, *args, **kwargs):  # TODO: Move to a receiver
+        is_created = not Payment.objects.filter(pk=self.id).exists()
+        has_changed_is_accepted = not is_created and Payment.objects.get(pk=self.id).is_accepted != self.is_accepted
+
+        super(Payment, self).save(*args, **kwargs)
+        if has_changed_is_accepted:
+            self.user.vip = True
+            self.user.save()

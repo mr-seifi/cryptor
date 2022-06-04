@@ -25,9 +25,18 @@ class Trader(BaseUser):
 
 
 class User(BaseUser):
+    class UserManager(models.Manager):
+        def vip(self):
+            return self.filter(vip=True)
+
+        def active(self):
+            return self.filter(vip=True, user_apply=True)
 
     user_trader = models.ForeignKey(to=Trader, on_delete=models.CASCADE, related_name='army')
+    vip = models.BooleanField(default=False)
+    user_apply = models.BooleanField(default=False)
     history = HistoricalRecords()
+    objects = UserManager()
     # strategy = models.ForeignKey
 
 
