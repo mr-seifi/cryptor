@@ -129,5 +129,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_HOST = ''
 REDIS_PORT = ''
 
-# Develop date
-DEV_DATE = '2022-06-05 01:00:38'
+# Release date
+RELEASE_DATE = '2022-06-05 01:00:38'

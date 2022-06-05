@@ -1,7 +1,7 @@
 from .models import User
 from _helpers import singleton, DateTimeService
 from django.utils import timezone
-from cryptor.settings import DEV_DATE
+from cryptor.settings import RELEASE_DATE
 from django.db.models import Min
 
 
@@ -9,7 +9,7 @@ from django.db.models import Min
 class AccountService:
 
     @staticmethod
-    def calculate_signups(start=DEV_DATE, end=timezone.now, queryset=None) -> int:
+    def calculate_signups(start=RELEASE_DATE, end=timezone.now, queryset=None) -> int:
         if queryset:
             return queryset.filter(created__gte=start, created__lte=end).count()
         return User.objects.filter(created__gte=start, created__lte=end).count()
@@ -42,11 +42,12 @@ class AccountService:
     def calculate_sgpd(cls, queryset=None) -> float:
         """
         SGPD: Signup per Day
+        :param queryset: User queryset to specify signups
         :return: float
         """
         signups = cls.calculate_signups(queryset=queryset)
-        since = DEV_DATE
-        if queryset:
+        since = RELEASE_DATE
+        if queryset and queryset.exists():
             since = queryset.aggregate(Min('created')).get('created__min')
         days = DateTimeService.diff_days(since=since)
         return signups / days
