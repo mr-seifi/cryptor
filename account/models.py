@@ -37,6 +37,12 @@ class User(BaseUser):
     user_apply = models.BooleanField(default=False)
     history = HistoricalRecords()
     objects = UserManager()
+
+    def vip_expiration_date(self):
+        return getattr(self.payments.last(), 'expired')
+
+    def active_plan(self):
+        return getattr(self.payments.last(), 'plan')
     # strategy = models.ForeignKey
 
 
