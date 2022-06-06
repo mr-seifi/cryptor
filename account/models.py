@@ -25,6 +25,11 @@ class Trader(BaseUser):
 
 
 class User(BaseUser):
+    class StrategyChoices(models.TextChoices):
+        LOW = 'low', 'LOW'
+        MEDIUM = 'medium', 'MEDIUM'
+        HIGH = 'high', 'HIGH'
+
     class UserManager(models.Manager):
         def vip(self):
             return self.filter(vip=True)
@@ -35,6 +40,7 @@ class User(BaseUser):
     user_trader = models.ForeignKey(to=Trader, on_delete=models.CASCADE, related_name='army')
     vip = models.BooleanField(default=False)
     user_apply = models.BooleanField(default=False)
+    strategy = models.CharField(choices=StrategyChoices.choices, max_length=8, default=StrategyChoices.LOW)
     history = HistoricalRecords()
     objects = UserManager()
 
@@ -43,7 +49,6 @@ class User(BaseUser):
 
     def active_plan(self):
         return getattr(self.payments.last(), 'plan')
-    # strategy = models.ForeignKey
 
 
 class Wallet(models.Model):
