@@ -25,6 +25,10 @@ class BaseKuCoinService:
             'method': 'POST',
             'endpoint': '/api/v1/orders'
         },
+        'cancel_order': {
+            'method': 'DELETE',
+            'endpoint': '/api/v1/orders/{order_id}'
+        },
         'get_order_list': {
             'method': 'GET',
             'endpoint': '/api/v1/orders'
@@ -44,6 +48,14 @@ class BaseKuCoinService:
         'get_contract_info': {
             'method': 'GET',
             'endpoint': '/api/v1/contracts/{symbol}'
+        },
+        'get_position_list': {
+            'method': 'GET',
+            'endpoint': '/api/v1/positions'
+        },
+        'get_untriggered_stop_order_list': {
+            'method': 'GET',
+            'endpoint': '/api/v1/stopOrders'
         },
     }
     LOCKED = False
@@ -250,6 +262,34 @@ class KuCoinService(BaseKuCoinService):
 
         return self.request(point='place_order', **kwargs)
 
+    def cancel_order(self, **kwargs):
+        """
+        Cancel an order (including a stop order).
+
+        You will receive success message once the system has received the cancellation request. The cancellation request will be processed by matching engine in sequence. To know if the request has been processed, you may check the order status or update message from the pushes.
+
+        The order id is the server-assigned order id，not the specified clientOid.
+
+        If the order can not be canceled (already filled or previously canceled, etc), then an error response will indicate the reason in the message field.
+        HTTP Request
+
+        DELETE /api/v1/orders/{order-id}
+        Example
+
+        DELETE /api/v1/orders/5cdfc120b21023a909e5ad52
+        API Permission
+
+        This endpoint requires the Trade permission.
+        REQUEST RATE LIMIT
+
+        This API is restricted for each account, the request rate limit is 40 times/3s.
+        RESPONSES
+        Param 	Type
+        cancelledOrderIds 	cancelled OrderIds.
+        """
+
+        return self.request(point='cancel_order', **kwargs)
+
     def _get_open_contract_list(self, **kwargs):
         """
         Submit request to get the info of all open contracts.
@@ -324,7 +364,7 @@ class KuCoinService(BaseKuCoinService):
 
         return self.request(point='get_open_contract_list', **kwargs)
 
-    def _stop_order_mass_cancellation(self, **kwargs):
+    def stop_order_mass_cancellation(self, **kwargs):
         """
         Cancel all untriggered stop orders. The response is a list of orderIDs of the canceled stop orders.
          To cancel triggered stop orders, please use 'Limit Order Mass Cancelation'.
@@ -350,7 +390,7 @@ class KuCoinService(BaseKuCoinService):
 
         return self.request(point='stop_order_mass_cancellation', **kwargs)
 
-    def _limit_order_mass_cancellation(self, **kwargs):
+    def limit_order_mass_cancellation(self, **kwargs):
         """
         Cancel all open orders (excluding stop orders). The response is a list of orderIDs of the canceled orders.
 
@@ -542,6 +582,132 @@ class KuCoinService(BaseKuCoinService):
 
         return self.request(point='get_order_list', **kwargs)
 
+    def get_position_list(self, **kwargs):
+        """
+        Get the position details of a specified position.
+        HTTP Request
+
+        GET /api/v1/positions
+        Example
+
+        GET /api/v1/positions
+        API Permission
+
+        This endpoint requires the General permission.
+        REQUEST RATE LIMIT
+
+        This API is restricted for each account, the request rate limit is 9 times/3s.
+        RESPONSES
+        Field 	Description
+        id 	Position ID
+        symbol 	Symbol
+        autoDeposit 	Auto deposit margin or not
+        maintMarginReq 	Maintenance margin requirement
+        riskLimit 	Risk limit
+        realLeverage 	Leverage o the order
+        crossMode 	Cross mode or not
+        delevPercentage 	ADL ranking percentile
+        openingTimestamp 	Open time
+        currentTimestamp 	Current timestamp
+        currentQty 	Current postion quantity
+        currentCost 	Current postion value
+        currentComm 	Current commission
+        unrealisedCost 	Unrealised value
+        realisedGrossCost 	Accumulated realised gross profit value
+        realisedCost 	Current realised position value
+        isOpen 	Opened position or not
+        markPrice 	Mark price
+        markValue 	Mark value
+        posCost 	Position value
+        posCross 	added margin
+        posInit 	Leverage margin
+        posComm 	Bankruptcy cost
+        posLoss 	Funding fees paid out
+        posMargin 	Position margin
+        posMaint 	Maintenance margin
+        maintMargin 	Position margin
+        realisedGrossPnl 	Accumulated realised gross profit value
+        realisedPnl 	Realised profit and loss
+        unrealisedPnl 	Unrealised profit and loss
+        unrealisedPnlPcnt 	Profit-loss ratio of the position
+        unrealisedRoePcnt 	Rate of return on investment
+        avgEntryPrice 	Average entry price
+        liquidationPrice 	Liquidation price
+        bankruptPrice 	Bankruptcy price
+        settleCurrency 	Currency used to clear and settle the trades
+        isInverse 	Reverse contract or not
+        maintainMargin 	Maintenance margin requirement
+        """
+
+        return self.request(point='get_position_list', **kwargs)
+
+    def get_untriggered_stop_order_list(self, **kwargs):
+        """
+        Get the un-triggered stop orders list.
+        HTTP Request
+
+        GET /api/v1/stopOrders
+        Example
+
+        GET /api/v1/stopOrders?symbol=XBTUSDM
+
+        Query this endpoint to get the untriggered stop orders of the position in XBTUSDM.
+        API Permission
+
+        This endpoint requires the General permission.
+        PARAMETERS
+
+        You can request for specific orders using query parameters.
+        Param 	Type 	Description
+        symbol 	String 	[optional] Symbol of the contract
+        side 	String 	[optional] buy or sell
+        type 	String 	[optional] limit, market
+        startAt 	long 	[optional] Start time (milisecond)
+        endAt 	long 	[optional] End time (milisecond)
+        RESPONSES
+        Param 	Type
+        id 	Order ID
+        symbol 	Symbol of the contract
+        type 	Order type, market order or limit order
+        side 	Transaction side
+        price 	Order price
+        size 	Order quantity
+        value 	Order value
+        dealValue 	Executed size of funds
+        dealSize 	Executed quantity
+        stp 	Self trade prevention types
+        stop 	Stop order type (stop limit or stop market)
+        stopPriceType 	Trigger price type of stop orders
+        stopTriggered 	Mark to show whether the stop order is triggered
+        stopPrice 	Trigger price of stop orders
+        timeInForce 	Time in force policy type
+        postOnly 	Mark of post only
+        hidden 	Mark of the hidden order
+        iceberg 	Mark of the iceberg order
+        leverage 	Leverage of the order
+        forceHold 	A mark to forcely hold the funds for an order
+        closeOrder 	A mark to close the position
+        visibleSize 	Visible size of the iceberg order
+        clientOid 	Unique order id created by users to identify their orders
+        remark 	Remark of the order
+        tags 	tag order source
+        isActive 	Mark of the active orders
+        cancelExist 	Mark of the canceled orders
+        createdAt 	Time the order created
+        updatedAt 	last update time
+        endAt 	End time
+        orderTime 	Order create time in nanosecond
+        settleCurrency 	settlement currency
+        status 	order status: “open” or “done”
+        filledSize 	Value of the executed orders
+        filledValue 	Executed order quantity
+        reduceOnly 	A mark to reduce the position size only
+
+        This request is paginated.
+        """
+
+        return self.request(point='get_untriggered_stop_order_list', **kwargs)
+
     def get_balance(self, **kwargs) -> float:
         code, data = self.get_account_overview(**kwargs)
         return data.get('data').get('availableBalance') or 0
@@ -557,36 +723,10 @@ class KuCoinService(BaseKuCoinService):
     def get_lot_size(self, symbol: str, balance: float, price: float, leverage: int, **kwargs):
         return int((balance * leverage) / (self._get_lot_size_contract(symbol=symbol, **kwargs) * price))
 
-    def place_limit_order(self, client_oid: str, side: str, symbol: str,
-                          leverage: str, price: str, size: str):
+    def place_stop_order(self, clientOid: str, side: str, symbol: str,
+                         stop: str, stop_price: str, size: str, **kwargs):
         params = {
-            'clientOid': client_oid,
-            'side': side,
-            'symbol': symbol,
-            'leverage': leverage,
-            'type': 'limit',
-            'price': price,
-            'size': size,
-        }
-
-        return self._place_order(**params)
-
-    def place_market_order(self, client_oid: str, side: str, symbol: str, leverage: str, size: str):
-        params = {
-            'clientOid': client_oid,
-            'side': side,
-            'symbol': symbol,
-            'leverage': leverage,
-            'type': 'market',
-            'size': size
-        }
-
-        return self._place_order(**params)
-
-    def place_stop_order(self, client_oid: str, side: str, symbol: str,
-                         stop: str, stop_price: str, size: str):
-        params = {
-            'clientOid': client_oid,
+            'clientOid': clientOid,
             'side': side,
             'symbol': symbol,
             'type': 'market',
@@ -594,68 +734,65 @@ class KuCoinService(BaseKuCoinService):
             'stopPriceType': 'TP',
             'stopPrice': stop_price,
             'leverage': '1',
-            'size': size
+            'size': size,
         }
 
-        return self._place_order(**params)
+        return self._place_order(**params, **kwargs)
+
+    def close_position(self, symbol: str, **kwargs):
+        code, data = self.get_position_list(symbol=symbol, **kwargs)
+        positions = data.get('data')
+
+        current_position = ''
+        for pos in positions:
+            if pos['symbol'] == symbol:
+                current_position = pos
+                break
+
+        return self._place_order(symbol=symbol, type='market',
+                                 closeOrder=True, clientOid=current_position.get('id'), **kwargs)
 
     def place_order(self, symbol: str, leverage: str, price: str, order_type: str,
-                    size: str, tp_prices: str, stop_price: str, tp_sizes: list, type: str):
-
-        client_oid = uuid4().hex
+                    size: str, tp_prices: str, stop_price: str, tp_sizes: list, type: str,
+                    **kwargs):
         side = ('sell', 'buy')[type == 'long']
 
-        if order_type == 'limit':
-            main_order = self.place_limit_order(client_oid=client_oid,
-                                                side=side,
-                                                symbol=symbol,
-                                                leverage=leverage,
-                                                price=price,
-                                                size=size)
-        else:
-            main_order = self.place_market_order(client_oid=client_oid,
-                                                 side=side,
-                                                 symbol=symbol,
-                                                 leverage=leverage,
-                                                 size=size)
+        main_order = self._place_order(clientOid=uuid4().hex,
+                                       side=side,
+                                       symbol=symbol,
+                                       leverage=leverage,
+                                       price=price,
+                                       size=size,
+                                       type=order_type,
+                                       **kwargs)
 
-        tp_orders = [self.place_stop_order(client_oid=client_oid,
+        tp_orders = [self.place_stop_order(clientOid=uuid4().hex,
                                            side='sell' if side == 'buy' else 'buy',
                                            symbol=symbol,
                                            stop='up' if side == 'buy' else 'down',
                                            stop_price=tp_price,
-                                           size=tp_sizes[it]) for it, tp_price in enumerate(tp_prices) if tp_price]
+                                           size=tp_sizes[it],
+                                           **kwargs) for it, tp_price in enumerate(tp_prices) if tp_price and tp_sizes[it]]
 
-        sl_order = self.place_stop_order(client_oid=client_oid,
+        sl_order = self.place_stop_order(clientOid=uuid4().hex,
                                          side='sell' if side == 'buy' else 'buy',
                                          symbol=symbol,
                                          stop='down' if side == 'buy' else 'up',
                                          stop_price=stop_price,
-                                         size=size)
+                                         size=size,
+                                         **kwargs)
 
         return main_order, tp_orders, sl_order
 
-    def limit_order_mass_cancellation(self, symbol: str):
-        params = {
-            'symbol': symbol
-        }
-
-        return self._limit_order_mass_cancellation(**params)
-
-    def stop_order_mass_cancellation(self, symbol):
-        params = {
-            'symbol': symbol
-        }
-
-        return self._stop_order_mass_cancellation(**params)
-
-    def execute_signal(self, signal: Signal, user: User, usable_balance: float):
+    def execute_signal(self, signal: Signal, user: User, usable_balance: float, **kwargs):
         usable_balance_lot = self.get_lot_size(symbol=signal.pair, balance=usable_balance,
-                                               price=signal.entry, leverage=signal.leverage)
+                                               price=signal.entry, leverage=signal.leverage,
+                                               **kwargs)
 
         service: MarketService = MarketService()
-        tp_sizes = service.calculate_target_shares(user.strategy, target_count=signal.targets.size) * usable_balance_lot
+        tp_sizes = [portion * usable_balance_lot for portion in service.calculate_target_shares(user.strategy,
+                                                                                                len(signal.targets))]
         return self.place_order(symbol=signal.pair, leverage=str(signal.leverage),
                                 price=str(signal.entry), type=signal.type, order_type=signal.order_type,
                                 size=str(usable_balance_lot), tp_prices=signal.targets,
-                                stop_price=str(signal.stop_loss), tp_sizes=tp_sizes)
+                                stop_price=str(signal.stop_loss), tp_sizes=tp_sizes, **kwargs)

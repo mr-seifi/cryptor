@@ -52,13 +52,21 @@ class Signal(models.Model):
     risk_reward = models.FloatField(blank=True)
     leverage = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(100)])
     timeframe = models.CharField(choices=TimeframeChoices.choices, max_length=8)
-    status = models.CharField(choices=StatusChoices.choices, max_length=12)
+    status = models.CharField(choices=StatusChoices.choices, default=StatusChoices.NOT_FILLED, max_length=12)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
     def __str__(self):
         return f'{self.pair}:{self.type}'
+
+    def _calculate_risk_reward(self) -> float:
+        target_avg = sum(self.targets) / len(self.targets)
+        return abs((target_avg - self.entry) / (self.entry - self.stop_loss))
+
+    def save(self, *args, **kwargs):
+        self.risk_reward = self._calculate_risk_reward()
+        super(Signal, self).save(*args, **kwargs)
 
 
 class Trade(models.Model):
