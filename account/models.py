@@ -16,7 +16,7 @@ class BaseUser(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.token[:6]}:{self.name}'
+        return f'{self.token.hex[:6]}:{self.name}'
 
 
 class Trader(BaseUser):
@@ -41,6 +41,7 @@ class User(BaseUser):
     vip = models.BooleanField(default=False)
     user_apply = models.BooleanField(default=False)
     strategy = models.CharField(choices=StrategyChoices.choices, max_length=8, default=StrategyChoices.LOW)
+    cap = models.FloatField(null=True, max_length=5)
     history = HistoricalRecords()
     objects = UserManager()
 
