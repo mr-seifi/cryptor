@@ -1,3 +1,13 @@
-from django.shortcuts import render
+from telegram import (Update)
+from telegram.ext import (CallbackContext)
 
-# Create your views here.
+
+class AccountTelegramView:
+
+    @staticmethod
+    def user_menu(update: Update, context: CallbackContext):
+        pass
+
+    @staticmethod
+    def trader_menu(update: Update, context: CallbackContext):
+        pass

@@ -1,5 +1,5 @@
 from .models import User
-from _helpers import singleton, DateTimeService
+from _helpers import singleton, DateTimeService, CacheService
 from django.utils import timezone
 from cryptor.settings import RELEASE_DATE
 from django.db.models import Min
@@ -60,3 +60,50 @@ class AccountService:
         if last_payment.is_accepted and not last_payment.is_expired():
             return True
         return False
+
+
+class ProfileService:
+
+    PROFILE_PREFIX = 'P'
+    REDIS_KEYS = {
+        'wallet_network': f'{PROFILE_PREFIX}:WALLET:''{user_id}',
+        'api_key': f'{PROFILE_PREFIX}:API_KEY:''{user_id}',
+        'api_secret': f'{PROFILE_PREFIX}:API_SECRET:''{user_id}',
+    }
+    EX = 60 * 60
+
+    @classmethod
+    def _cache(cls, key, user_id, value):
+        key = cls.REDIS_KEYS[key].format(user_id=user_id)
+        service: CacheService = CacheService()
+        service.cache(key=key, value=value, ex=cls.EX)
+
+    @classmethod
+    def _get(cls, key, user_id):
+        key = cls.REDIS_KEYS[key].format(user_id=user_id)
+        service: CacheService = CacheService()
+        return service.get(key=key)
+
+    @classmethod
+    def cache_wallet_network(cls, user_id, wallet_network):
+        cls._cache(key='wallet_network', user_id=user_id, value=wallet_network)
+
+    @classmethod
+    def get_wallet_network(cls, user_id):
+        return cls._get(key='wallet_network', user_id=user_id)
+
+    @classmethod
+    def cache_api_key(cls, user_id, api_key):
+        cls._cache(key='api_key', user_id=user_id, value=api_key)
+
+    @classmethod
+    def get_api_key(cls, user_id):
+        return cls._get(key='api_key', user_id=user_id)
+
+    @classmethod
+    def cache_api_secret(cls, user_id, api_secret):
+        cls._cache(key='api_secret', user_id=user_id, value=api_secret)
+
+    @classmethod
+    def get_api_secret(cls, user_id):
+        return cls._get(key='api_secret', user_id=user_id)
