@@ -4,10 +4,6 @@
 
 **Description**: This project features an auto-trader bot developed in Python. The bot operates based on trading signals and integrates with multiple cryptocurrency exchanges, including KuCoin, to automate trading strategies and manage trades efficiently.
 
-**Date**: June 2022
-
-**Code**: [GitHub Repository](https://github.com/mr-seifi/cryptor)
-
 ## Project Summary
 
 This project involves creating an advanced auto-trader bot with the following features:
